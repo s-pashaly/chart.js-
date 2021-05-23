@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>GRC dynamic chart</title>
+  </head>
+
+
+  <body>
+
+    <div style="display: flex; justify-content: center; margin: 20px;">
+        <button onclick="grcInfo('houseData')">
+            Houses
+        </button>
+        <button onclick="grcInfo('unitData')">
+            Units
+        </button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <canvas id="grcChart" width="400" height="200"></canvas>
+
+    <script>
+
+        function grcInfo(main){   
+
+        $.getJSON("grcData.json", function( data ) {
+
+            var model = data[main]
+       
+            //Chart starts here
+            var ctx = document.getElementById("grcChart");
+            var grcChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data['yearsData']['years'],
+                    datasets: []
+                }, 
+
+                options: {
+                //     responsive: false,
+                // maintainAspectRatio: false,
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 2,
+                                }
+                            },
+                            scales: {
+                                yAxes: [{
+                                    gridLines: {
+                                        zeroLineWidth: 7,
+                                        zeroLineColor: 'rgba(255, 32, 32, 1)'
+                                    }
+                                }],
+                                    ticks: {
+                                        beginAtZero: true,
+                                        callback: function(value, index, values) {
+                                            return value + '%';
+                                        }
+                                    }
+                                }
+                            }
+        });
+
+        //function loop 
+      
+        for (suburb in model) {
+            
+                var newDataset = {
+                    label: suburb,
+                    data: [],
+                    fill: false, 
+                    borderColor: model[suburb]['color']
+                };
+
+                for (value in model[suburb]['val']) {
+                    newDataset.data.push(model[suburb]['val'][value]);
+                    console.log(model[suburb]['val'][value]) ;
+                }
+
+                grcChart.config.data.datasets.push(newDataset);
+
+            }
+
+            grcChart.update();
+
+        });
+
+    }
+
+    $( document ).ready(function() {
+                grcInfo('houseData');
+            });
+
+    </script>
+
+</body>
+</html>
